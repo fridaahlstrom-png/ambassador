@@ -596,7 +596,6 @@
   // ── CONFIG ─────────────────────────────────────
   // Byt ut dessa värden:
   const AMBASSADOR_PASSWORD = 'ambassador2024';        // ← ändra lösenordet här
-  const RECIPIENT_EMAIL     = 'info@treeofpets.se';    // ← ändra e-postadressen här
   // ────────────────────────────────────────────────
 
   // Login
@@ -657,13 +656,8 @@
     });
   });
 
-  // ── MAILTO helper ──────────────────────────────
-  function buildMailto(subject, body) {
-    return `mailto:${RECIPIENT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }
-
   // ── Submit: Order ──────────────────────────────
-  document.getElementById('submit-order').addEventListener('click', () => {
+  document.getElementById('submit-order').addEventListener('click', async () => {
     const name       = document.getElementById('o-name').value.trim();
     const custno     = document.getElementById('o-custno').value.trim();
     const contact    = document.getElementById('o-contact').value.trim();
@@ -696,30 +690,38 @@
       ? `Upphämtning i butik: ${store}`
       : delivery;
 
-    const body =
-`FODERBESTÄLLNING – Tree of Pets Ambassadörsportalen
-${'='.repeat(48)}
+    const btn = document.getElementById('submit-order');
+    btn.disabled = true;
+    btn.textContent = 'Skickar...';
 
-Namn:              ${name}
-Kundnummer:        ${custno}
-Kontaktperson:     ${contact || '–'}
+    try {
+      const res = await fetch('https://formspree.io/f/mojojwbq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          Namn:              name,
+          Kundnummer:        custno,
+          Kontaktperson:     contact || '–',
+          Beställning:       products,
+          Leveranssätt:      deliveryLine,
+          'Om kvoten överstigs': quota,
+          Kommentar:         notes || '–',
+          _subject:          `Foderbeställning – ${name} (kundnr ${custno})`
+        })
+      });
 
-BESTÄLLNING
-${products}
-
-Leveranssätt:      ${deliveryLine}
-
-Om beställningen överstiger kvoten:
-${quota}
-
-Kommentar:
-${notes || '–'}
-
-${'─'.repeat(48)}
-Skickat via ambassador.treeofpets.se`;
-
-    window.location.href = buildMailto(`Foderbeställning – ${name} (kundnr ${custno})`, body);
-    document.getElementById('order-success').style.display = 'block';
+      if (res.ok) {
+        document.getElementById('order-success').style.display = 'block';
+        document.getElementById('order-success').scrollIntoView({ behavior: 'smooth' });
+        btn.textContent = 'Skickat ✓';
+      } else {
+        throw new Error('Fel vid inskickning');
+      }
+    } catch (e) {
+      alert('Något gick fel. Försök igen eller kontakta oss direkt.');
+      btn.disabled = false;
+      btn.textContent = 'Skicka beställning →';
+    }
   });
 
 </script>
