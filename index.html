@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambassadörsportalen – Tree of Pets</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --forest:  #1C2B1A;
+    --sage:    #4A6741;
+    --leaf:    #7AAB6A;
+    --cream:   #F7F4EE;
+    --sand:    #E8E1D3;
+    --text:    #1C2B1A;
+    --muted:   #7A7468;
+    --white:   #FFFFFF;
+    --error:   #C0392B;
+    --success: #2E7D32;
+    --radius:  10px;
+    --shadow:  0 4px 24px rgba(28,43,26,0.10);
+  }
+
+  body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--text); min-height: 100vh; }
+
+  /* LOGIN */
+  #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--forest); padding: 24px; }
+  .login-card { background: var(--white); border-radius: 16px; padding: 48px 44px 44px; width: 100%; max-width: 420px; box-shadow: 0 12px 48px rgba(0,0,0,0.25); text-align: center; }
+  .login-logo { font-family: 'Playfair Display', serif; font-size: 15px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sage); margin-bottom: 6px; }
+  .login-title { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--forest); margin-bottom: 8px; }
+  .login-sub { font-size: 14px; color: var(--muted); margin-bottom: 36px; }
+  .login-error { display: none; background: #FEE; border: 1px solid #FCC; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--error); margin-top: 12px; text-align: left; }
+  .btn-primary { width: 100%; padding: 14px; background: var(--forest); color: var(--white); border: none; border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 24px; letter-spacing: 0.04em; transition: background 0.2s; }
+  .btn-primary:hover { background: var(--sage); }
+
+  /* PORTAL */
+  #portal-screen { display: none; }
+  header { background: var(--forest); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 68px; position: sticky; top: 0; z-index: 100; }
+  .header-brand { font-family: 'Playfair Display', serif; font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream); }
+  .header-title { color: var(--leaf); font-size: 13px; font-weight: 500; letter-spacing: 0.06em; }
+  .logout-btn { background: none; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.7); border-radius: 6px; padding: 7px 14px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif; transition: border-color 0.2s, color 0.2s; }
+  .logout-btn:hover { border-color: var(--leaf); color: var(--leaf); }
+
+  .portal-inner { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  .portal-greeting { margin-bottom: 36px; }
+  .portal-greeting h1 { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--forest); margin-bottom: 8px; }
+  .portal-greeting p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+  /* FORM */
+  .form-card { background: var(--white); border-radius: 16px; padding: 40px; box-shadow: var(--shadow); }
+  .form-section-title { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--forest); margin-bottom: 6px; }
+  .form-section-desc { font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; }
+  .form-row { margin-bottom: 22px; }
+  .form-row.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field-label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; text-align: left; }
+  .field-input { width: 100%; padding: 13px 16px; border: 1.5px solid var(--sand); border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 15px; color: var(--text); background: var(--cream); transition: border-color 0.2s; outline: none; }
+  .field-input:focus { border-color: var(--leaf); background: var(--white); }
+  textarea.field-input { resize: vertical; min-height: 110px; line-height: 1.5; }
+  .required-note { font-size: 12px; color: var(--muted); margin-bottom: 28px; }
+  .required-note span { color: var(--error); }
+  label.required::after { content: ' *'; color: var(--error); }
+  .divider { border: none; border-top: 1px solid var(--sand); margin: 32px 0; }
+
+  /* RADIO OPTIONS */
+  .radio-option { display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px; border: 1.5px solid var(--sand); border-radius: var(--radius); cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none; margin-bottom: 10px; }
+  .radio-option:last-child { margin-bottom: 0; }
+  .radio-option:hover { border-color: var(--leaf); background: #F0F5EF; }
+  .radio-option.checked { border-color: var(--leaf); background: #EBF3E9; }
+  .radio-option input { display: none; }
+  .radio-dot { width: 18px; height: 18px; border: 2px solid var(--sand); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: border-color 0.2s, background 0.2s; }
+  .radio-option.checked .radio-dot { border-color: var(--leaf); background: var(--leaf); }
+  .radio-dot-inner { width: 7px; height: 7px; border-radius: 50%; background: white; display: none; }
+  .radio-option.checked .radio-dot-inner { display: block; }
+  .radio-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .radio-desc { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+
+  /* SUBMIT */
+  .form-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 32px; gap: 16px; flex-wrap: wrap; }
+  .submit-note { font-size: 12px; color: var(--muted); line-height: 1.5; max-width: 340px; }
+  .btn-submit { padding: 14px 32px; background: var(--forest); color: var(--white); border: none; border-radius: var(--radius); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.04em; transition: background 0.2s; white-space: nowrap; }
+  .btn-submit:hover { background: var(--sage); }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+  .success-banner { display: none; background: #EBF3E9; border: 1.5px solid var(--leaf); border-radius: var(--radius); padding: 20px 24px; margin-top: 24px; font-size: 14px; color: var(--success); line-height: 1.5; }
+  .success-banner strong { display: block; font-size: 15px; margin-bottom: 4px; }
+
+  @media (max-width: 600px) {
+    header { padding: 0 20px; }
+    .form-card { padding: 28px 20px; }
+    .form-row.two-col { grid-template-columns: 1fr; }
+    .portal-inner { padding: 32px 16px 60px; }
+    .form-footer { flex-direction: column; align-items: stretch; }
+    .btn-submit { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Tree of Pets</div>
+    <h1 class="login-title">Ambassadörsportalen</h1>
+    <p class="login-sub">Logga in med ditt ambassadörslösenord för att fortsätta.</p>
+    <div class="form-row">
+      <label class="field-label" for="login-pw">Lösenord</label>
+      <input class="field-input" type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password">
+      <div class="login-error" id="login-error">Felaktigt lösenord. Försök igen.</div>
+    </div>
+    <button class="btn-primary" id="login-btn">Logga in</button>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div id="portal-screen">
+  <header>
+    <span class="header-brand">Tree of Pets</span>
+    <span class="header-title">Ambassadörsportalen</span>
+    <button class="logout-btn" id="logout-btn">Logga ut</button>
+  </header>
+
+  <div class="portal-inner">
+    <div class="portal-greeting">
+      <h1>Välkommen! 🐾</h1>
+      <p>Här beställer du foder som ambassadör. Fyll i formuläret nedan så återkommer vi med bekräftelse.</p>
+    </div>
+
+    <div class="form-card">
+      <h2 class="form-section-title">Beställ foder</h2>
+      <p class="form-section-desc">Fyll i dina uppgifter och vad du vill beställa. Vi bekräftar din beställning via e-post.</p>
+      <p class="required-note">Fält markerade med <span>*</span> är obligatoriska.</p>
+
+      <div class="form-row two-col">
+        <div>
+          <label class="field-label required" for="o-name">Namn</label>
+          <input class="field-input" type="text" id="o-name" placeholder="Förnamn Efternamn">
+        </div>
+        <div>
+          <label class="field-label required" for="o-custno">Kundnummer</label>
+          <input class="field-input" type="text" id="o-custno" placeholder="T.ex. 12345678" maxlength="8" pattern="\d{8}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="field-label" for="o-contact">Din kontaktperson hos oss</label>
+        <input class="field-input" type="text" id="o-contact" placeholder="Namn på din kontakt">
+      </div>
+
+      <div class="form-row">
+        <label class="field-label required" for="o-products">Önskad beställning – produkt, storlek och antal</label>
+        <textarea class="field-input" id="o-products"></textarea>
+      </div>
+
+      <div class="form-row">
+        <label class="field-label required">Leveranssätt</label>
+
+        <label class="radio-option" data-delivery="warehouse">
+          <input type="radio" name="delivery" value="Upphämtning på lagret – Moränvägen 10 A, Vallentuna">
+          <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+          <div>
+            <div class="radio-name">Hämta på lagret</div>
+            <div class="radio-desc">Moränvägen 10 A, Vallentuna</div>
+          </div>
+        </label>
+
+        <label class="radio-option" data-delivery="store">
+          <input type="radio" name="delivery" value="Upphämtning i butik">
+          <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+          <div>
+            <div class="radio-name">Hämta i butik</div>
+            <div class="radio-desc">Ange butikens namn nedan</div>
+          </div>
+        </label>
+
+        <label class="radio-option" data-delivery="home">
+          <input type="radio" name="delivery" value="Hemleverans">
+          <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+          <div>
+            <div class="radio-name">Hemleverans</div>
+            <div class="radio-desc">Endast för dig som bor i hus där paket kan lämnas utan kvittens. Vi levererar inte till dörren i lägenhetshus – även om du kan ta emot andra leveranser (t.ex. Mathem) utan kvittens gäller inte det för våra paket.</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-row" id="o-store-row" style="display:none;">
+        <label class="field-label required" for="o-store">Butikens namn</label>
+        <input class="field-input" type="text" id="o-store" placeholder="T.ex. Djurmagazinet Stockholm">
+      </div>
+
+      <div class="form-row" id="o-terms-row" style="display:none;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;color:var(--text);line-height:1.6;">
+          <input type="checkbox" id="o-terms" style="margin-top:3px;accent-color:var(--leaf);width:16px;height:16px;flex-shrink:0;">
+          <span>Jag godkänner villkoren för hemleverans: jag bor i <strong>hus</strong> där paket kan lämnas utan kvittens (vi levererar inte till dörren i lägenhetshus). Beställning av minst <strong>5 säckar är fraktfritt</strong> – vid beställning under 30 kg tillkommer <strong>150 kr</strong> i frakt, och vid beställning över 30 kg tillkommer <strong>450 kr</strong> i frakt. <span style="color:var(--error);">*</span></span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label class="field-label required">Om beställningen överstiger din kvot</label>
+
+        <label class="radio-option" data-quota="invoice">
+          <input type="radio" name="quota" value="Fakturera det som överstiger kvoten">
+          <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+          <div>
+            <div class="radio-name">Fakturera det som överstiger kvoten</div>
+            <div class="radio-desc">Jag godkänner att mellanskillnaden faktureras mig</div>
+          </div>
+        </label>
+
+        <label class="radio-option" data-quota="quote">
+          <input type="radio" name="quota" value="Skicka offert först">
+          <div class="radio-dot"><div class="radio-dot-inner"></div></div>
+          <div>
+            <div class="radio-name">Skicka offert först</div>
+            <div class="radio-desc">Jag vill se en offert innan ni skickar det som överstiger kvoten</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label class="field-label" for="o-notes">Kommentar</label>
+        <textarea class="field-input" id="o-notes" placeholder="Övriga önskemål, frågor eller information till oss..."></textarea>
+      </div>
+
+      <div class="form-footer">
+        <p class="submit-note">Din beställning skickas till vårt team som återkommer med bekräftelse och leveransinformation.</p>
+        <button class="btn-submit" id="submit-order">Skicka beställning →</button>
+      </div>
+
+      <div class="success-banner" id="order-success">
+        <strong>✅ Beställning mottagen!</strong>
+        Tack! Vi har tagit emot din beställning och återkommer snart med bekräftelse.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const AMBASSADOR_PASSWORD = 'ambassador2024'; // ← ändra lösenordet här
+
+  // Login
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const loginPw = document.getElementById('login-pw');
+  const loginErr = document.getElementById('login-error');
+
+  function showPortal() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('portal-screen').style.display = 'block';
+    sessionStorage.setItem('top_auth', '1');
+  }
+  function showLogin() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('portal-screen').style.display = 'none';
+    sessionStorage.removeItem('top_auth');
+  }
+
+  if (sessionStorage.getItem('top_auth') === '1') showPortal();
+
+  loginBtn.addEventListener('click', () => {
+    if (loginPw.value === AMBASSADOR_PASSWORD) {
+      loginErr.style.display = 'none';
+      showPortal();
+    } else {
+      loginErr.style.display = 'block';
+      loginPw.focus();
+    }
+  });
+  loginPw.addEventListener('keydown', e => { if (e.key === 'Enter') loginBtn.click(); });
+  logoutBtn.addEventListener('click', showLogin);
+
+  // Radio: delivery
+  document.querySelectorAll('.radio-option[data-delivery]').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.radio-option[data-delivery]').forEach(o => o.classList.remove('checked'));
+      opt.classList.add('checked');
+      opt.querySelector('input').checked = true;
+      document.getElementById('o-store-row').style.display = opt.dataset.delivery === 'store' ? 'block' : 'none';
+      document.getElementById('o-terms-row').style.display = opt.dataset.delivery === 'home' ? 'block' : 'none';
+      if (opt.dataset.delivery !== 'home') document.getElementById('o-terms').checked = false;
+    });
+  });
+
+  // Radio: quota
+  document.querySelectorAll('.radio-option[data-quota]').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.radio-option[data-quota]').forEach(o => o.classList.remove('checked'));
+      opt.classList.add('checked');
+      opt.querySelector('input').checked = true;
+    });
+  });
+
+  // Submit
+  document.getElementById('submit-order').addEventListener('click', async () => {
+    const name       = document.getElementById('o-name').value.trim();
+    const custno     = document.getElementById('o-custno').value.trim();
+    const contact    = document.getElementById('o-contact').value.trim();
+    const products   = document.getElementById('o-products').value.trim();
+    const deliveryEl = document.querySelector('input[name="delivery"]:checked');
+    const delivery   = deliveryEl ? deliveryEl.value : '';
+    const store      = document.getElementById('o-store').value.trim();
+    const quotaEl    = document.querySelector('input[name="quota"]:checked');
+    const quota      = quotaEl ? quotaEl.value : '';
+    const notes      = document.getElementById('o-notes').value.trim();
+
+    if (custno && (custno.length !== 8 || !/^\d{8}$/.test(custno))) {
+      alert('Kundnumret ska vara exakt 8 siffror.');
+      return;
+    }
+    if (!name || !custno || !products || !delivery || !quota) {
+      alert('Fyll i alla obligatoriska fält innan du skickar.');
+      return;
+    }
+    if (delivery === 'Upphämtning i butik' && !store) {
+      alert('Ange butikens namn.');
+      return;
+    }
+    if (delivery === 'Hemleverans' && !document.getElementById('o-terms').checked) {
+      alert('Du måste godkänna villkoren för hemleverans innan du skickar.');
+      return;
+    }
+
+    const deliveryLine = delivery === 'Upphämtning i butik' ? `Upphämtning i butik: ${store}` : delivery;
+
+    const btn = document.getElementById('submit-order');
+    btn.disabled = true;
+    btn.textContent = 'Skickar...';
+
+    try {
+      const res = await fetch('https://formspree.io/f/mojojwbq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          Namn:                  name,
+          Kundnummer:            custno,
+          Kontaktperson:         contact || '–',
+          'Beställning':         products,
+          'Leveranssätt':        deliveryLine,
+          'Om kvoten överstigs': quota,
+          Kommentar:             notes || '–',
+          _subject:              `Foderbeställning – ${name} (kundnr ${custno})`
+        })
+      });
+
+      if (res.ok) {
+        document.getElementById('order-success').style.display = 'block';
+        document.getElementById('order-success').scrollIntoView({ behavior: 'smooth' });
+        btn.textContent = 'Skickat ✓';
+      } else {
+        throw new Error();
+      }
+    } catch {
+      alert('Något gick fel. Försök igen eller kontakta oss direkt.');
+      btn.disabled = false;
+      btn.textContent = 'Skicka beställning →';
+    }
+  });
+</script>
+</body>
+</html>
